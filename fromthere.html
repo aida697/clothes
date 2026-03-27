@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOIR | THE COMPLETE ARCHIVE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@100;400;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --accent: #0047ff; --bg: #030303; --radius: 24px; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: white; cursor: none; overflow-x: hidden; transition: background-color 0.8s ease; }
+        h1, h2, h3, .syne { font-family: 'Syne', sans-serif; text-transform: uppercase; }
+        
+        #cursor { width: 15px; height: 15px; background: white; border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; mix-blend-mode: difference; transform: translate(-50%, -50%); transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+
+        /* --- START FIRST INTRO STYLES --- */
+        #enter-overlay { position: fixed; inset: 0; background: black; z-index: 1000; display: flex; justify-content: center; items-center; cursor: pointer; overflow: hidden; }
+        .boot-bg-img { 
+            position: absolute; inset: 0; width: 100%; height: 100%; 
+            object-fit: cover; object-position: top; 
+            opacity: 0.45; filter: saturate(0.4) brightness(0.6); 
+            transform: scale(1.1);
+        }
+        .overlay-vignette { position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, transparent 0%, black 85%); z-index: 2; }
+        /* --- END FIRST INTRO STYLES --- */
+
+        .bar { transition: height 0.2s ease; }
+        @keyframes music-wave { from { height: 4px; } to { height: 16px; } }
+
+        .hero-text { font-size: clamp(3rem, 15vw, 12rem); line-height: 0.8; letter-spacing: -0.05em; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .marquee { display: flex; white-space: nowrap; animation: marquee 25s linear infinite; }
+        .blue-gradient { background: radial-gradient(circle at center, #001c66 0%, #030303 70%); }
+        
+        .product-card { 
+            position: relative; overflow: hidden; background: transparent; border-radius: var(--radius);
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
+        .product-card img { border-radius: var(--radius); width: 100%; height: 100%; object-fit: cover; }
+        .product-image-alt { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.6s ease, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        
+        #minimal .product-card img { object-fit: contain; object-position: center; transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease; }
+        #minimal .product-card:hover img:first-child { transform: scale(1.02) translateY(-10px); filter: drop-shadow(0 30px 60px rgba(255,255,255,0.1)); }
+        #minimal .product-card:hover .product-image-alt { opacity: 1; }
+        .product-card:hover .product-image-alt { opacity: 1; transform: scale(1.05); }
+
+        .bg-text-layer { position: absolute; font-size: 20vw; font-weight: 900; color: rgba(255,255,255,0.03); z-index: 1; pointer-events: none; letter-spacing: -0.05em; white-space: nowrap; }
+        .reveal-target img { filter: grayscale(100%); transition: filter 0.8s ease; }
+        .reveal-target:hover img { filter: grayscale(0%); }
+
+        .price-float { 
+            position: absolute; top: 25px; right: 25px; background: white; color: black; padding: 6px 16px; border-radius: 30px; 
+            font-weight: 800; font-family: 'Syne'; font-size: 0.85rem; z-index: 50; transform: translateX(30px); opacity: 0; 
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+        .product-card:hover .price-float { transform: translateX(0); opacity: 1; }
+
+        .state-blue { background-color: #001440 !important; --cursor-accent: #00d2ff; }
+        .state-noir { background-color: #050505 !important; --cursor-accent: #ffffff; }
+        .state-purple { background-color: #120821 !important; --cursor-accent: #a855f7; }
+        .state-pink { background-color: #2b0312 !important; --cursor-accent: #e11d48; }
+        .state-white { background-color: #ffffff !important; --cursor-accent: #000000; color: black !important; }
+
+        .ruby-text { font-size: clamp(4rem, 10vw, 12rem); line-height: 0.75; letter-spacing: -0.05em; }
+        .geo-label { font-family: 'Inter', sans-serif; font-weight: 300; letter-spacing: 0.05em; text-transform: none; }
+    </style>
+</head>
+<body class="state-blue overflow-hidden">
+
+    <div id="cursor"></div>
+
+    <div id="enter-overlay" onclick="startExperience()">
+        <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/8bf3cf70d6014f8ea27ef659c8137cd7_9366/EQT_Zipped_Tracktop_Blue_KC1778_HM6.jpg" class="boot-bg-img" id="hero-face">
+        <div class="overlay-vignette"></div>
+        <div class="text-center group z-10" id="enter-content">
+            <div class="text-[10px] tracking-[0.8em] opacity-40 mb-4 group-hover:opacity-100 transition duration-700">CONNECTION ESTABLISHED</div>
+            <h2 class="syne text-5xl md:text-7xl font-black italic tracking-tighter mix-blend-exclusion">ENTER ARCHIVE</h2>
+            <div class="mt-4 text-[9px] font-mono opacity-30">TBILISI_SYS_v.5</div>
+        </div>
+    </div>
+    <audio id="bg-music" loop>
+        <source src="kisa.mp3" type="audio/mpeg">
+    </audio>
+
+    <nav class="fixed top-0 w-full z-[100] px-10 py-8 flex justify-between items-center mix-blend-difference">
+        <div class="text-2xl font-extrabold tracking-tighter syne italic">NOIR. <span class="text-[10px] opacity-40 font-light ml-2 not-italic tracking-normal">ARCHIVE_v.5</span></div>
+        <div class="hidden md:flex space-x-12 text-[10px] tracking-[0.3em] font-bold uppercase items-center">
+            <a href="#ocean" class="nav-link hover:opacity-50 transition">CYAN / ცისფერი</a>
+            <a href="#minimal" class="nav-link hover:opacity-50 transition">DARK / შავი</a>
+            <a href="#denim" class="nav-link hover:opacity-50 transition">IRIS / იისფერი</a>
+            <a href="#acid" class="nav-link hover:opacity-50 transition">RUBY / ლალი</a>
+            <div id="audio-visualizer" class="flex items-end space-x-1 h-4 cursor-pointer">
+                <div class="bar w-[2px] bg-white h-4"></div>
+                <div class="bar w-[2px] bg-white h-2"></div>
+                <div class="bar w-[2px] bg-white h-3"></div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="h-screen flex flex-col justify-center items-center relative px-6 overflow-hidden blue-gradient">
+        <div class="absolute inset-8 opacity-20 overflow-hidden" style="border-radius: 20px;">
+            <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/51736c0d204546f59db1dcea121ecb59_9366/EQT_Zipped_Tracktop_Blue_KC1778_HM11.jpg" class="w-full h-full object-cover grayscale">
+        </div>
+        <h1 class="hero-text syne font-extrabold z-10 text-center">DEEP<br><span class="italic text-transparent" style="-webkit-text-stroke: 1px #0047ff;">OCEAN</span></h1>
+    </section>
+
+    <div class="py-10 border-y border-white/5 overflow-hidden bg-black text-blue-500 z-20 relative">
+        <div class="marquee syne text-4xl font-black italic">EQT ZIPPED TRACKTOP &nbsp; • &nbsp; LIMITED BLUE &nbsp; • &nbsp; NOIR ATELIER &nbsp; • &nbsp; TBILISI 2026 &nbsp; • &nbsp; თბილისი &nbsp; • &nbsp;</div>
+    </div>
+
+    <section id="ocean" class="py-40 px-6 max-w-[1400px] mx-auto transition-colors" data-color="state-blue">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-20 items-start">
+            <div class="group">
+                <div class="product-card aspect-[3/4]">
+                    <div class="price-float">490 ₾</div>
+                    <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/7483368312b14cf3be3f1297028ab136_9366/EQT_Zipped_Tracktop_Blue_KC1778_HM1.jpg">
+                    <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/f91e5ddf49854b428ab55b6151630ffa_9366/EQT_Zipped_Tracktop_Blue_KC1778_HM3_hover.jpg" class="product-image-alt">
+                </div>
+            </div>
+            <div class="group md:pt-40">
+                <div class="product-card aspect-square">
+                    <div class="price-float">390 ₾</div>
+                    <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/9d6db486a82140838a34de35f4e298f9_9366/ADIDAS_x_FARM_RIO_HOUSE_OF_TIRO_TRACK_TOP_Blue_KD4635_HM1.jpg">
+                    <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/17ee1a8559f44f8886b689f5844ce621_9366/ADIDAS_x_FARM_RIO_HOUSE_OF_TIRO_TRACK_TOP_Blue_KD4635_HM3_hover.jpg" class="product-image-alt">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="minimal" class="h-screen relative flex items-center justify-center transition-colors overflow-hidden bg-[#050505]" data-color="state-noir">
+        <h2 class="bg-text-layer syne italic">SHADOW_Y3</h2>
+        <div class="max-w-[1400px] w-full mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10 items-center relative z-10">
+            <div class="flex flex-col justify-center order-2 md:order-1">
+                <h3 class="text-5xl syne font-bold mb-1 tracking-tighter">TENNIS SHORTS</h3>
+                <p class="text-[10px] font-mono opacity-40 uppercase tracking-[0.4em]">SPEC: KG3565 / DESIGN: Y-3</p>
+            </div>
+            <div class="product-card aspect-[3/4] order-1 md:order-2">
+                <div class="price-float">280 ₾</div>
+                <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/8c7b52b410a4420abf3eb3ec95b12119_9366/Y-3_TENNIS_SHORTS_Black_KG3565_21_model.jpg">
+                <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/3990bf6440fc40da82fd5639b8c33117_9366/Y-3_TENNIS_SHORTS_Black_KG3565_41_detail.jpg" class="product-image-alt">
+            </div>
+        </div>
+    </section>
+
+    <section id="denim" class="py-40 px-6 transition-colors" data-color="state-purple">
+        <div class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div class="product-card aspect-[3/4]">
+                <div class="price-float">520 ₾</div>
+                <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/97ffab33510741f3a4bdc3feb6135617_9366/DENIM_TRACKPANTS_Black_KD3919_HM1.jpg">
+                <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/3fef8f3048f043cf896935efeab2bd2d_9366/DENIM_TRACKPANTS_Black_KD3919_HM3_hover.jpg" class="product-image-alt">
+            </div>
+            <div class="product-card reveal-target aspect-[3/4] md:translate-y-20">
+                <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/c46e537afe21480ba08415f054974b40_9366/DENIM_TRACKPANTS_Black_KD3919_HM7.jpg">
+            </div>
+            <div class="product-card aspect-[3/4]">
+                <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6a498f8356974a35be6b32da454440c4_9366/DENIM_TRACKPANTS_Black_KD3919_HM9.jpg">
+            </div>
+        </div>
+    </section>
+
+    <section id="acid" class="py-60 px-6 transition-colors" data-color="state-pink">
+        <div class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 items-end">
+            <div class="md:col-span-8">
+                <h3 class="ruby-text syne font-black italic text-rose-600 mb-10">RUBY<br><span class="text-white">CORE_v1</span></h3>
+                <div class="product-card aspect-[3/4] md:w-[70%]">
+                    <div class="price-float">450 ₾</div>
+                    <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/7965e15aeb474150833954ba8b8dc510_9366/FIREBIRD_TRACK_TOP_DENIM_Red_KE8885_21_model.jpg">
+                    <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/a7032050a3db4c26b4446b4bc2425e56_9366/FIREBIRD_TRACK_TOP_DENIM_Red_KE8885_23_hover_model.jpg" class="product-image-alt">
+                </div>
+            </div>
+            <div class="md:col-span-4">
+                <div class="product-card aspect-[3/4]">
+                    <div class="price-float">310 ₾</div>
+                    <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/7d25e7c071ab4c39acd4bc4dd360a152_9366/Chile_Reconstructed_Bringback_Jersey_Red_KD0968_HM1.jpg">
+                    <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/03db7d3b63e5435d96beab6fe4179734_9366/Chile_Reconstructed_Bringback_Jersey_Red_KD0968_HM11.jpg" class="product-image-alt">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="finale" class="h-[150vh] flex flex-col items-center justify-center transition-colors relative overflow-hidden" data-color="state-white">
+        <div class="absolute inset-0 flex items-center justify-between px-10 md:px-40 pointer-events-none">
+            <img src="https://i.postimg.cc/Jnk3CLwT/image1.png" id="finale-left" class="h-[70vh] w-auto grayscale" alt="Silhouette Left">
+            <img src="https://i.postimg.cc/ZRdPzSkG/image2.png" id="finale-right" class="h-[70vh] w-auto" alt="Silhouette Right">
+        </div>
+        <div class="z-10 text-center">
+            <div class="overflow-hidden">
+                <h2 class="syne text-[8vw] font-black italic tracking-tighter leading-none" id="finale-text">BEYOND FABRIC</h2>
+            </div>
+            <p class="geo-label text-sm mt-4 opacity-40 uppercase tracking-[0.3em]">უკვდავი ფორმები / ATELIER NOIR</p>
+        </div>
+        <div class="absolute bottom-20 flex space-x-20 text-[10px] tracking-[0.5em] font-mono opacity-30">
+            <span>TBILISI ATELIER</span>
+            <span>SYSTEM_OVERRIDE</span>
+            <span>NOIR_LOG.V5</span>
+        </div>
+    </section>
+
+    <footer class="py-20 text-center opacity-20 text-[10px] tracking-widest font-mono">NOIR ARCHIVE © 2026 // TBILISI_GEORGIA</footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+        // --- MUSIC & START (FIRST VERSION LOGIC) ---
+        const audio = document.getElementById('bg-music');
+        const bars = document.querySelectorAll('.bar');
+        audio.volume = 0.1;
+
+        function startExperience() {
+            const tl = gsap.timeline();
+            
+            // From Version 1: Zoom face while sliding overlay up
+            tl.to("#enter-content", { opacity: 0, y: -50, duration: 0.5 })
+              .to("#hero-face", { scale: 1.3, duration: 2, ease: "power4.inOut" }, 0)
+              .to("#enter-overlay", { 
+                  y: "-100%", 
+                  duration: 1.5, 
+                  ease: "power4.inOut", 
+                  onComplete: () => {
+                      document.getElementById('enter-overlay').style.display = 'none';
+                      document.body.classList.remove('overflow-hidden');
+                      document.body.style.overflow = 'auto'; // Enable scrolling
+                  }
+              }, 0.3);
+
+            audio.play();
+            bars.forEach((bar, i) => bar.style.animation = `music-wave 0.6s ease-in-out infinite alternate ${i * 0.2}s`);
+        }
+
+        // --- CURSOR & PARALLAX ---
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            // Face parallax logic from Version 1
+            const xVal = (e.clientX / window.innerWidth - 0.5) * 20;
+            const yVal = (e.clientY / window.innerHeight - 0.5) * 20;
+            gsap.to("#hero-face", { x: xVal, y: yVal, duration: 1.5, ease: "power2.out" });
+
+            // Cursor movement
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.4, ease: "power3.out" });
+        });
+
+        function getCurrentAccent() {
+            return getComputedStyle(document.body).getPropertyValue('--cursor-accent').trim() || "#ffffff";
+        }
+
+        document.querySelectorAll('.product-card, a, #audio-visualizer').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                const accent = getCurrentAccent();
+                if(el.classList.contains('reveal-target')) {
+                    gsap.to(cursor, { scale: 8, backgroundColor: "rgba(255,255,255,0.1)", border: "1px solid white", mixBlendMode: "normal" });
+                } else {
+                    gsap.to(cursor, { scale: 5, backgroundColor: accent, mixBlendMode: "difference" });
+                }
+            });
+            el.addEventListener('mouseleave', () => {
+                gsap.to(cursor, { scale: 1, backgroundColor: "white", mixBlendMode: "difference", border: "none" });
+            });
+        });
+
+        // --- SECTION COLOR SWAPPING ---
+        document.querySelectorAll('section[data-color]').forEach((section) => {
+            ScrollTrigger.create({
+                trigger: section, start: "top 50%",
+                onEnter: () => {
+                    document.body.className = section.getAttribute('data-color');
+                    if(section.id === 'finale') {
+                        gsap.to(".nav-link, nav div, .bar", { color: "black", backgroundColor: (i, el) => el.classList.contains('bar') ? "black" : "", duration: 0.5 });
+                    }
+                },
+                onEnterBack: () => {
+                    document.body.className = section.getAttribute('data-color');
+                    if(section.id !== 'finale') {
+                        gsap.to(".nav-link, nav div, .bar", { color: "white", backgroundColor: (i, el) => el.classList.contains('bar') ? "white" : "", duration: 0.5 });
+                    }
+                },
+            });
+        });
+
+        // --- FINALE ANIMATIONS ---
+        gsap.to("#finale-left", {
+            scrollTrigger: { trigger: "#finale", start: "top bottom", end: "bottom top", scrub: 1 },
+            x: -100, y: -50, rotate: -5
+        });
+        gsap.to("#finale-right", {
+            scrollTrigger: { trigger: "#finale", start: "top bottom", end: "bottom top", scrub: 1 },
+            x: 100, y: 50, rotate: 5
+        });
+        gsap.from("#finale-text", {
+            scrollTrigger: { trigger: "#finale", start: "top 60%" },
+            y: 100, skewY: 10, opacity: 0, duration: 1.5, ease: "power4.out"
+        });
+
+        // --- NAV LINKS ---
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                gsap.to(window, { duration: 1.8, scrollTo: { y: link.getAttribute('href'), offsetY: 20 }, ease: "power4.inOut" });
+            });
+        });
+    </script>
+</body>
+</html>
