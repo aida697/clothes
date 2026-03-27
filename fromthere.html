@@ -17,7 +17,7 @@
         #cursor { width: 15px; height: 15px; background: white; border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; mix-blend-mode: difference; transform: translate(-50%, -50%); transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
 
         /* --- START FIRST INTRO STYLES --- */
-        #enter-overlay { position: fixed; inset: 0; background: black; z-index: 1000; display: flex; justify-content: center; items-center; cursor: pointer; overflow: hidden; }
+        #enter-overlay { position: fixed; inset: 0; background: black; z-index: 1000; display: flex; justify-content: center; align-items: center; cursor: pointer; overflow: hidden; }
         .boot-bg-img { 
             position: absolute; inset: 0; width: 100%; height: 100%; 
             object-fit: cover; object-position: top; 
@@ -27,7 +27,7 @@
         .overlay-vignette { position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, transparent 0%, black 85%); z-index: 2; }
         /* --- END FIRST INTRO STYLES --- */
 
-        .bar { transition: height 0.2s ease; }
+        .bar { transition: height 0.2s ease; animation-play-state: paused; }
         @keyframes music-wave { from { height: 4px; } to { height: 16px; } }
 
         .hero-text { font-size: clamp(3rem, 15vw, 12rem); line-height: 0.8; letter-spacing: -0.05em; }
@@ -82,6 +82,7 @@
             <div class="mt-4 text-[9px] font-mono opacity-30">TBILISI_SYS_v.5</div>
         </div>
     </div>
+    
     <audio id="bg-music" loop>
         <source src="kisa.mp3" type="audio/mpeg">
     </audio>
@@ -93,6 +94,7 @@
             <a href="#minimal" class="nav-link hover:opacity-50 transition">DARK / შავი</a>
             <a href="#denim" class="nav-link hover:opacity-50 transition">IRIS / იისფერი</a>
             <a href="#acid" class="nav-link hover:opacity-50 transition">RUBY / ლალი</a>
+            
             <div id="audio-visualizer" class="flex items-end space-x-1 h-4 cursor-pointer">
                 <div class="bar w-[2px] bg-white h-4"></div>
                 <div class="bar w-[2px] bg-white h-2"></div>
@@ -205,15 +207,15 @@
     <script>
         gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
-        // --- MUSIC & START (FIRST VERSION LOGIC) ---
         const audio = document.getElementById('bg-music');
+        const visualizer = document.getElementById('audio-visualizer');
         const bars = document.querySelectorAll('.bar');
         audio.volume = 0.1;
 
+        // --- START EXPERIENCE ---
         function startExperience() {
             const tl = gsap.timeline();
             
-            // From Version 1: Zoom face while sliding overlay up
             tl.to("#enter-content", { opacity: 0, y: -50, duration: 0.5 })
               .to("#hero-face", { scale: 1.3, duration: 2, ease: "power4.inOut" }, 0)
               .to("#enter-overlay", { 
@@ -223,23 +225,35 @@
                   onComplete: () => {
                       document.getElementById('enter-overlay').style.display = 'none';
                       document.body.classList.remove('overflow-hidden');
-                      document.body.style.overflow = 'auto'; // Enable scrolling
+                      document.body.style.overflow = 'auto'; 
                   }
               }, 0.3);
 
             audio.play();
-            bars.forEach((bar, i) => bar.style.animation = `music-wave 0.6s ease-in-out infinite alternate ${i * 0.2}s`);
+            // Init animation
+            bars.forEach((bar, i) => {
+                bar.style.animation = `music-wave 0.6s ease-in-out infinite alternate ${i * 0.2}s`;
+                bar.style.animationPlayState = 'running';
+            });
         }
+
+        // --- MUSIC TOGGLE ---
+        visualizer.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                bars.forEach(bar => bar.style.animationPlayState = 'running');
+            } else {
+                audio.pause();
+                bars.forEach(bar => bar.style.animationPlayState = 'paused');
+            }
+        });
 
         // --- CURSOR & PARALLAX ---
         const cursor = document.getElementById('cursor');
         document.addEventListener('mousemove', (e) => {
-            // Face parallax logic from Version 1
             const xVal = (e.clientX / window.innerWidth - 0.5) * 20;
             const yVal = (e.clientY / window.innerHeight - 0.5) * 20;
             gsap.to("#hero-face", { x: xVal, y: yVal, duration: 1.5, ease: "power2.out" });
-
-            // Cursor movement
             gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.4, ease: "power3.out" });
         });
 
