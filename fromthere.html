@@ -12,7 +12,7 @@
     <style>
         :root { --accent: #0047ff; --bg: #030303; --radius: 24px; }
         
-        /* FORCE HIDE WINDOWS HAND EVERYWHERE */
+        
         * { cursor: none !important; }
 
         body { 
@@ -25,7 +25,7 @@
 
         h1, h2, h3, .syne { font-family: 'Syne', sans-serif; text-transform: uppercase; }
         
-        /* CENTERED INVERSION CURSOR */
+        
         #cursor { 
             width: 15px; 
             height: 15px; 
@@ -37,7 +37,7 @@
             pointer-events: none; 
             z-index: 9999; 
             mix-blend-mode: difference; 
-            /* Added transform-origin and translate to keep it centered always */
+            
             transform: translate(-50%, -50%);
             transition: width 0.3s cubic-bezier(0.23, 1, 0.32, 1), 
                         height 0.3s cubic-bezier(0.23, 1, 0.32, 1), 
@@ -45,7 +45,7 @@
             will-change: transform;
         }
         
-        /* Expanded state for clickable elements */
+       
         .cursor-hover { 
             width: 80px !important; 
             height: 80px !important; 
@@ -318,15 +318,15 @@
         audio.volume = 0.15;
         let selectedSize = null;
 
-        // HIGH PERFORMANCE CENTERED CURSOR
+        
         document.addEventListener('mousemove', (e) => {
-            // GSAP handles the X and Y coordinates instantly
+            
             gsap.set("#cursor", { 
                 x: e.clientX, 
                 y: e.clientY 
             });
 
-            // Parallax for hero face if visible
+            
             const heroFace = document.getElementById('hero-face');
             if (heroFace && window.getComputedStyle(document.getElementById('enter-overlay')).display !== 'none') {
                 const xVal = (e.clientX / window.innerWidth - 0.5) * 20;
@@ -335,7 +335,7 @@
             }
         });
 
-        // Initialize Cursor Hover Effects
+       
         function initCursorHover() {
             const interactive = document.querySelectorAll('button, a, .product-card, #audio-visualizer, .size-btn, [onclick], nav div');
             interactive.forEach(el => {
